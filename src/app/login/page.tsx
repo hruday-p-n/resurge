@@ -105,7 +105,7 @@ export default function LoginPage({
 
           <button
             type="submit"
-            className="bg-green-500 hover:bg-green-600 transition p-3 rounded font-semibold"
+            className="bg-blue-500 hover:bg-blue-600 transition p-3 rounded font-semibold"
           >
             {isLogin ? "Login" : "Create Account"}
           </button>
@@ -115,7 +115,7 @@ export default function LoginPage({
           {isLogin ? "No account?" : "Already have an account?"}{" "}
           <button
             onClick={() => setIsLogin(!isLogin)}
-            className="text-green-400 underline"
+            className="text-blue-400 underline"
           >
             {isLogin ? "Sign up" : "Login"}
           </button>

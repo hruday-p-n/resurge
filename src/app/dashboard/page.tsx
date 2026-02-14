@@ -186,27 +186,28 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-black text-white px-4 sm:px-8 py-6">
 
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold">
-          Resurge
-        </h1>
+{/* Header */}
+<div className="flex justify-between items-center mb-8">
+  <h1 className="text-xl sm:text-3xl font-bold">
+    Resurge
+  </h1>
 
-        <button
-          onClick={handleLogout}
-          className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg"
-        >
-          Logout
-        </button>
-      </div>
+  <button
+    onClick={handleLogout}
+    className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg text-sm sm:text-base"
+  >
+    Logout
+  </button>
+</div>
+
 
       {/* Welcome */}
       <div className="bg-zinc-900 p-4 sm:p-6 rounded-2xl mb-6">
-        Hello{" "}
-        <span className="text-green-400 font-semibold">
+        Welcome{" "}
+        <span className="text-blue-400 font-semibold">
           {username || user?.email}
         </span>{" "}
-        👋
+
       </div>
 
       {/* Start Date */}
@@ -339,7 +340,7 @@ export default function DashboardPage() {
             <div className="flex justify-center gap-4">
               <button
                 onClick={confirmToggle}
-                className="bg-green-600 px-4 py-2 rounded-lg"
+                className="bg-blue-600 px-4 py-2 rounded-lg"
               >
                 Confirm
               </button>
@@ -367,7 +368,7 @@ function StatCard({ label, value }: { label: string; value: any }) {
       <p className="text-gray-400 text-xs sm:text-sm mb-1">
         {label}
       </p>
-      <p className="text-lg sm:text-2xl font-bold text-green-400">
+      <p className="text-lg sm:text-2xl font-bold text-blue-400">
         {value}
       </p>
     </div>
