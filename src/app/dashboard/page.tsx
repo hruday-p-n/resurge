@@ -19,11 +19,9 @@ export default function DashboardPage() {
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  // Normalize today
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // Month navigation state
   const [viewDate, setViewDate] = useState(new Date());
   const viewYear = viewDate.getFullYear();
   const viewMonth = viewDate.getMonth();
@@ -62,11 +60,7 @@ export default function DashboardPage() {
 
   const saveStartDate = async (date: string) => {
     if (!user) return;
-
-    await updateDoc(doc(db, "users", user.uid), {
-      startDate: date,
-    });
-
+    await updateDoc(doc(db, "users", user.uid), { startDate: date });
     setStartDate(date);
   };
 
@@ -96,7 +90,6 @@ export default function DashboardPage() {
     setSelectedDay(null);
   };
 
-  // 🔥 Current Streak
   const calculateCurrentStreak = () => {
     if (!startDate) return 0;
 
@@ -127,7 +120,6 @@ export default function DashboardPage() {
     return streak;
   };
 
-  // 🏆 Longest Streak
   const calculateLongestStreak = () => {
     if (!startDate) return 0;
 
@@ -192,9 +184,14 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white p-8 relative">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Resurge</h1>
+    <div className="min-h-screen bg-black text-white px-4 sm:px-8 py-6">
+
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold">
+          Resurge
+        </h1>
+
         <button
           onClick={handleLogout}
           className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg"
@@ -203,7 +200,8 @@ export default function DashboardPage() {
         </button>
       </div>
 
-      <div className="bg-zinc-900 p-6 rounded-2xl mb-6">
+      {/* Welcome */}
+      <div className="bg-zinc-900 p-4 sm:p-6 rounded-2xl mb-6">
         Hello{" "}
         <span className="text-green-400 font-semibold">
           {username || user?.email}
@@ -211,12 +209,15 @@ export default function DashboardPage() {
         👋
       </div>
 
+      {/* Start Date */}
       {!startDate && (
-        <div className="bg-zinc-900 p-6 rounded-2xl mb-6">
-          <h2 className="mb-2 font-semibold">Select your start date</h2>
+        <div className="bg-zinc-900 p-4 sm:p-6 rounded-2xl mb-6">
+          <h2 className="mb-2 font-semibold">
+            Select your start date
+          </h2>
           <input
             type="date"
-            className="bg-zinc-800 p-2 rounded-lg"
+            className="bg-zinc-800 p-2 rounded-lg w-full"
             onChange={(e) => saveStartDate(e.target.value)}
           />
         </div>
@@ -224,15 +225,18 @@ export default function DashboardPage() {
 
       {startDate && (
         <>
-          <div className="grid md:grid-cols-4 gap-4 mb-6">
-            <StatCard label="Current Streak" value={`${calculateCurrentStreak()} 🔥`} />
-            <StatCard label="Longest Streak" value={`${calculateLongestStreak()} 🏆`} />
+          {/* Stats */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+            <StatCard label="Current" value={`${calculateCurrentStreak()} 🔥`} />
+            <StatCard label="Longest" value={`${calculateLongestStreak()} 🏆`} />
             <StatCard label="Clean Days" value={cleanDays} />
-            <StatCard label="Success Rate" value={`${successRate}%`} />
+            <StatCard label="Success %" value={`${successRate}%`} />
           </div>
 
-          <div className="bg-zinc-900 p-6 rounded-2xl">
-            {/* Month Navigation */}
+          {/* Calendar */}
+          <div className="bg-zinc-900 p-4 sm:p-6 rounded-2xl">
+
+            {/* Month Nav */}
             <div className="flex justify-between items-center mb-4">
               <button
                 onClick={() =>
@@ -243,14 +247,13 @@ export default function DashboardPage() {
                 ◀
               </button>
 
-              <h2 className="text-2xl font-bold">
+              <h2 className="text-lg sm:text-2xl font-bold">
                 {monthName} {viewYear}
               </h2>
 
               <button
                 onClick={() => {
                   const next = new Date(viewYear, viewMonth + 1, 1);
-
                   if (
                     next.getFullYear() < today.getFullYear() ||
                     (next.getFullYear() === today.getFullYear() &&
@@ -265,23 +268,21 @@ export default function DashboardPage() {
               </button>
             </div>
 
-            <div className="grid grid-cols-7 gap-4">
+            {/* Days */}
+            <div className="grid grid-cols-7 gap-2 sm:gap-4">
               {getDaysInMonth().map((day) => {
                 const dateObj = new Date(viewYear, viewMonth, day);
                 dateObj.setHours(0, 0, 0, 0);
 
                 const formatted = `${viewYear}-${viewMonth + 1}-${day}`;
 
-                const isFuture =
-                  dateObj.getTime() > today.getTime();
+                const isFuture = dateObj.getTime() > today.getTime();
 
                 let isBeforeStart = false;
                 if (startDate) {
-                  const [sy, sm, sd] =
-                    startDate.split("-").map(Number);
+                  const [sy, sm, sd] = startDate.split("-").map(Number);
                   const startObj = new Date(sy, sm - 1, sd);
                   startObj.setHours(0, 0, 0, 0);
-
                   isBeforeStart =
                     dateObj.getTime() < startObj.getTime();
                 }
@@ -302,19 +303,16 @@ export default function DashboardPage() {
                     }}
                     className={`
                       flex items-center justify-center
-                      h-12 rounded-xl font-semibold transition relative
+                      h-10 sm:h-12 text-sm sm:text-base
+                      rounded-xl font-semibold transition
                       ${
                         isFuture || isBeforeStart
-                          ? "bg-zinc-800 text-gray-500 cursor-not-allowed"
+                          ? "bg-zinc-800 text-gray-500"
                           : status === "relapse"
-                          ? "bg-red-500 hover:bg-red-600"
-                          : "bg-green-600 hover:bg-green-700"
+                          ? "bg-red-500"
+                          : "bg-green-600"
                       }
-                      ${
-                        isToday
-                          ? "ring-4 ring-yellow-400 scale-105"
-                          : ""
-                      }
+                      ${isToday ? "ring-2 sm:ring-4 ring-yellow-400" : ""}
                     `}
                   >
                     {day}
@@ -326,9 +324,10 @@ export default function DashboardPage() {
         </>
       )}
 
+      {/* Modal */}
       {showConfirm && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center">
-          <div className="bg-zinc-900 p-6 rounded-2xl w-80 text-center">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center px-4">
+          <div className="bg-zinc-900 p-6 rounded-2xl w-full max-w-sm text-center">
             <p className="mb-4">
               {streakData[
                 `${viewYear}-${viewMonth + 1}-${selectedDay}`
@@ -364,9 +363,13 @@ export default function DashboardPage() {
 
 function StatCard({ label, value }: { label: string; value: any }) {
   return (
-    <div className="bg-zinc-900 p-5 rounded-2xl text-center">
-      <p className="text-gray-400 text-sm mb-2">{label}</p>
-      <p className="text-2xl font-bold text-green-400">{value}</p>
+    <div className="bg-zinc-900 p-4 sm:p-5 rounded-2xl text-center">
+      <p className="text-gray-400 text-xs sm:text-sm mb-1">
+        {label}
+      </p>
+      <p className="text-lg sm:text-2xl font-bold text-green-400">
+        {value}
+      </p>
     </div>
   );
 }
