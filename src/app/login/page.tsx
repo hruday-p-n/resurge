@@ -10,13 +10,20 @@ import { doc, setDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 
-export default function LoginPage() {
+export default function LoginPage({
+  defaultMode = "login",
+}: {
+  defaultMode?: "login" | "signup";
+}) {
   const router = useRouter();
 
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLogin, setIsLogin] = useState(true);
+
+  // 👇 This now depends on route
+  const [isLogin, setIsLogin] = useState(defaultMode === "login");
+
   const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
