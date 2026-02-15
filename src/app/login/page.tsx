@@ -21,28 +21,25 @@ export default function LoginPage({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  // 👇 This now depends on route
   const [isLogin, setIsLogin] = useState(defaultMode === "login");
-
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false); // ✅ NEW
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setLoading(true); // ✅ start loading
 
     try {
       if (isLogin) {
-        // Login
         await signInWithEmailAndPassword(auth, email, password);
       } else {
-        // Sign Up
         const userCredential = await createUserWithEmailAndPassword(
           auth,
           email,
           password
         );
 
-        // Create Firestore document
         await setDoc(doc(db, "users", userCredential.user.uid), {
           username,
           email,
@@ -55,6 +52,7 @@ export default function LoginPage({
     } catch (err: any) {
       console.error("Auth error:", err);
       setError(err.message);
+      setLoading(false); // ✅ stop loading on error
     }
   };
 
@@ -67,7 +65,6 @@ export default function LoginPage({
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           
-          {/* Username (Signup Only) */}
           {!isLogin && (
             <input
               type="text"
@@ -76,10 +73,10 @@ export default function LoginPage({
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
+              disabled={loading}
             />
           )}
 
-          {/* Email */}
           <input
             type="email"
             placeholder="Email"
@@ -87,9 +84,9 @@ export default function LoginPage({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            disabled={loading}
           />
 
-          {/* Password */}
           <input
             type="password"
             placeholder="Password"
@@ -97,6 +94,7 @@ export default function LoginPage({
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            disabled={loading}
           />
 
           {error && (
@@ -105,16 +103,27 @@ export default function LoginPage({
 
           <button
             type="submit"
-            className="bg-blue-500 hover:bg-blue-600 transition p-3 rounded font-semibold"
+            disabled={loading}
+            className="bg-blue-500 hover:bg-blue-600 transition p-3 rounded font-semibold flex items-center justify-center disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {isLogin ? "Login" : "Create Account"}
+            {loading ? (
+              <span className="flex gap-1">
+                <span className="animate-bounce">.</span>
+                <span className="animate-bounce delay-100">.</span>
+                <span className="animate-bounce delay-200">.</span>
+              </span>
+            ) : isLogin ? (
+              "Login"
+            ) : (
+              "Create Account"
+            )}
           </button>
         </form>
 
         <p className="text-sm text-center mt-4">
           {isLogin ? "No account?" : "Already have an account?"}{" "}
           <button
-            onClick={() => setIsLogin(!isLogin)}
+            onClick={() => !loading && setIsLogin(!isLogin)}
             className="text-blue-400 underline"
           >
             {isLogin ? "Sign up" : "Login"}

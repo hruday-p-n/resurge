@@ -6,13 +6,14 @@ import { onAuthStateChanged, signOut, User } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import Image from "next/image";
+import Link from "next/link";
 
 export default function DashboardPage() {
   const router = useRouter();
 
   const [username, setUsername] = useState("");
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
   const [streakData, setStreakData] = useState<Record<string, string>>({});
   const [startDate, setStartDate] = useState<string | null>(null);
 
@@ -28,35 +29,38 @@ export default function DashboardPage() {
   const monthName = viewDate.toLocaleString("default", { month: "long" });
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (!currentUser) {
-        router.push("/login");
-        setLoading(false);
+        router.replace("/login");
         return;
       }
 
       setUser(currentUser);
 
-      const docRef = doc(db, "users", currentUser.uid);
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        setUsername(data.username || "");
-        setStreakData(data.streakData || {});
-        setStartDate(data.startDate || null);
-      }
-
-      setLoading(false);
+      // fetch firestore AFTER render (no blocking)
+      fetchUserData(currentUser);
     });
 
     return () => unsubscribe();
   }, [router]);
 
+  const fetchUserData = async (currentUser: User) => {
+    const docRef = doc(db, "users", currentUser.uid);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      setUsername(data.username || "");
+      setStreakData(data.streakData || {});
+      setStartDate(data.startDate || null);
+    }
+  };
+
   const handleLogout = async () => {
     await signOut(auth);
-    router.push("/login");
+    router.replace("/");
   };
+
 
   const saveStartDate = async (date: string) => {
     if (!user) return;
@@ -175,30 +179,34 @@ export default function DashboardPage() {
       ? Math.round((cleanDays / totalTrackedDays) * 100)
       : 0;
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-black text-white">
-        Loading...
-      </div>
-    );
-  }
-
-  return (
+   return (
     <div className="min-h-screen bg-black text-white px-4 sm:px-8 py-6">
 
-{/* Header */}
-<div className="flex justify-between items-center mb-8">
-  <h1 className="text-xl sm:text-3xl font-bold">
-    Resurge
-  </h1>
+{/* NAVBAR */}
+<nav className="sticky top-0 z-50 flex justify-between items-center px-6 sm:px-8 py-4 border-b border-zinc-800 bg-black/80 backdrop-blur-md">
 
+  {/* Logo + Title */}
+  <Link href="/" className="flex items-center gap-3">
+    <Image
+      src="/icon.png"
+      alt="Resurge Logo"
+      width={28}
+      height={28}
+    />
+    <h1 className="text-xl sm:text-2xl font-bold text-blue-400">
+      Resurge
+    </h1>
+  </Link>
+
+  {/* Logout */}
   <button
     onClick={handleLogout}
-    className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg text-sm sm:text-base"
+    className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg text-sm sm:text-base transition"
   >
     Logout
   </button>
-</div>
+
+</nav>
 
 
       {/* Welcome */}
@@ -229,9 +237,9 @@ export default function DashboardPage() {
           {/* Stats */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
             <StatCard label="Current" value={`${calculateCurrentStreak()} 🔥`} />
-            <StatCard label="Longest" value={`${calculateLongestStreak()} 🏆`} />
+            <StatCard label="Longest" value={`${calculateLongestStreak()}`} />
             <StatCard label="Clean Days" value={cleanDays} />
-            <StatCard label="Success %" value={`${successRate}%`} />
+            <StatCard label="Success Rate" value={`${successRate}%`} />
           </div>
 
           {/* Calendar */}
@@ -311,7 +319,7 @@ export default function DashboardPage() {
                           ? "bg-zinc-800 text-gray-500"
                           : status === "relapse"
                           ? "bg-red-500"
-                          : "bg-green-600"
+                          : "bg-blue-600"
                       }
                       ${isToday ? "ring-2 sm:ring-4 ring-yellow-400" : ""}
                     `}
