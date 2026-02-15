@@ -4,6 +4,7 @@ export const metadata = {
   title: "Resurge",
   description: "Rise Again.",
   icon: "/icon.png",
+  apple:"/apple-touch-icon.png",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
