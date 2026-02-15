@@ -105,7 +105,7 @@ export default function Home() {
       </section>
 
       <footer className="border-t border-zinc-800 py-8 text-center text-gray-500 text-sm">
-        <p>Resurge v1.0</p>
+        <p>Resurge v1.1</p>
         <p className="mt-2">
           Made by <span className="text-blue-400 font-medium">MazeRunner1531</span>
         </p>
