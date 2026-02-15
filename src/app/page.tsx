@@ -11,6 +11,13 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
+    // ✅ Instant check (no delay)
+    if (auth.currentUser) {
+      router.replace("/dashboard");
+      return;
+    }
+
+    // Fallback listener (in case auth not initialized yet)
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         router.replace("/dashboard");
