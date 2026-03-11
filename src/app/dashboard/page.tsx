@@ -36,8 +36,6 @@ export default function DashboardPage() {
       }
 
       setUser(currentUser);
-
-      // fetch firestore AFTER render (no blocking)
       fetchUserData(currentUser);
     });
 
@@ -61,11 +59,29 @@ export default function DashboardPage() {
     router.replace("/");
   };
 
-
   const saveStartDate = async (date: string) => {
     if (!user) return;
     await updateDoc(doc(db, "users", user.uid), { startDate: date });
     setStartDate(date);
+  };
+
+  /* RESET FEATURE */
+  const resetProgress = async () => {
+    if (!user) return;
+
+    const confirmReset = confirm(
+      "This will erase all streak data and let you choose a new start date. Continue?"
+    );
+
+    if (!confirmReset) return;
+
+    await updateDoc(doc(db, "users", user.uid), {
+      streakData: {},
+      startDate: null,
+    });
+
+    setStreakData({});
+    setStartDate(null);
   };
 
   const getDaysInMonth = () => {
@@ -179,26 +195,19 @@ export default function DashboardPage() {
       ? Math.round((cleanDays / totalTrackedDays) * 100)
       : 0;
 
-   return (
+  return (
     <div className="min-h-screen bg-black text-white px-4 sm:px-8 py-6">
 
 {/* NAVBAR */}
 <nav className="sticky top-0 z-50 flex justify-between items-center px-6 sm:px-8 py-4 border-b border-zinc-800 bg-black/80 backdrop-blur-md">
 
-  {/* Logo + Title */}
   <Link href="/" className="flex items-center gap-3">
-    <Image
-      src="/icon.png"
-      alt="Resurge Logo"
-      width={28}
-      height={28}
-    />
+    <Image src="/icon.png" alt="Resurge Logo" width={28} height={28} />
     <h1 className="text-xl sm:text-2xl font-bold text-blue-400">
       Resurge
     </h1>
   </Link>
 
-  {/* Logout */}
   <button
     onClick={handleLogout}
     className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg text-sm sm:text-base transition"
@@ -208,17 +217,14 @@ export default function DashboardPage() {
 
 </nav>
 
-
       {/* Welcome */}
       <div className="bg-zinc-900 p-4 sm:p-6 rounded-2xl mb-6">
         Welcome{" "}
         <span className="text-blue-400 font-semibold">
           {username || user?.email}
-        </span>{" "}
-
+        </span>
       </div>
 
-      {/* Start Date */}
       {!startDate && (
         <div className="bg-zinc-900 p-4 sm:p-6 rounded-2xl mb-6">
           <h2 className="mb-2 font-semibold">
@@ -234,7 +240,6 @@ export default function DashboardPage() {
 
       {startDate && (
         <>
-          {/* Stats */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
             <StatCard label="Current" value={`${calculateCurrentStreak()} 🔥`} />
             <StatCard label="Longest" value={`${calculateLongestStreak()}`} />
@@ -242,10 +247,18 @@ export default function DashboardPage() {
             <StatCard label="Success Rate" value={`${successRate}%`} />
           </div>
 
+          {/* RESET BUTTON */}
+          <div className="flex justify-end mb-6">
+            <button
+              onClick={resetProgress}
+              className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-sm transition"
+            >
+              Reset Progress
+            </button>
+          </div>
+
           {/* Calendar */}
           <div className="bg-zinc-900 p-4 sm:p-6 rounded-2xl">
-
-            {/* Month Nav */}
             <div className="flex justify-between items-center mb-4">
               <button
                 onClick={() =>
@@ -277,7 +290,6 @@ export default function DashboardPage() {
               </button>
             </div>
 
-            {/* Days */}
             <div className="grid grid-cols-7 gap-2 sm:gap-4">
               {getDaysInMonth().map((day) => {
                 const dateObj = new Date(viewYear, viewMonth, day);
